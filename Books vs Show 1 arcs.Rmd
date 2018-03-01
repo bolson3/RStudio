@@ -1,0 +1,567 @@
+---
+title: "Book vs. Show Arcs 1"
+author: "Brett Olson"
+date: "November 14, 2017"
+output: html_document
+---
+
+```{r}
+library(tufte)
+library(tidyverse)
+library(ggplot2)
+library(ggmap)
+library(tint)
+library(lubridate)
+library(rvest)
+library(stringr)
+library(tidytext)
+library(tibble)
+library(wordcloud)
+library(dplyr)
+library(igraph)
+library(ggraph)
+library(data.table)
+knitr::opts_chunk$set(tidy = FALSE, message=FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+```{r}
+book1text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book1.txt")
+pattern <- "â???o"
+pattern1 <- "â???"
+pattern2 <- "kingâ???Ts"
+book1text <-gsub(pattern,"",book1text)
+book1text <- gsub(pattern1,"", book1text)
+book1text <- gsub(pattern2,"king's", book1text)
+book1texttable <- tibble(text=book1text)
+lines_book1<- book1texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) %>%
+  slice(1:293634)
+```
+
+```{r}
+plotsentiment_book1_bing <- lines_book1 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 250, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_book1_bing, aes(index, sentiment)) +
+  geom_col() 
+
+plotsentiment_book1_nrc<-
+  lines_book1 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 250, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_book1_nrc, aes(index, sentiment)) +
+  geom_col() 
+
+plotsentiment_book1_afinn<-
+  lines_book1 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 250, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_book1_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+s1e1text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e1.txt")
+s1e1texttable <- tibble(text=s1e1text)
+lines_s1e1_nonstop<- s1e1texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence)
+
+lines_s1e1 <- lines_s1e1_nonstop %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e1_bing <- lines_s1e1 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 75,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e1_nrc<-
+  lines_s1e1 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 75, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e1_bing, aes(index, sentiment)) +
+  geom_col() 
+
+plotsentiment_s1e1_afinn<-
+  lines_s1e1 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 75, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e1_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+s1e2text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e2.txt")
+s1e2texttable <- tibble(text=s1e2text)
+lines_s1e2<- s1e2texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e2_bing <- lines_s1e2 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 65, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e2_nrc<-
+  lines_s1e2 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 65, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e2_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e2_afinn<-
+  lines_s1e2 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 65, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e2_afinn, aes(index, sentiment)) +
+  geom_col() 
+
+```
+
+```{r}
+
+s1e3text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e3.txt")
+s1e3texttable <- tibble(text=s1e3text)
+lines_s1e3<- s1e3texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e3_bing <- lines_s1e3 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 80, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e3_nrc<-
+  lines_s1e3 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 80, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e3_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e3_afinn<-
+  lines_s1e3 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 80, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e3_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+s1e4text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e4.txt")
+s1e4texttable <- tibble(text=s1e4text)
+lines_s1e4<- s1e4texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e4_bing <- lines_s1e4 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 90, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+
+plotsentiment_s1e4_nrc<-
+  lines_s1e4 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 90, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e4_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e4_afinn<-
+  lines_s1e4 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 90, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e4_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+
+
+s1e5text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e5.txt")
+s1e5texttable <- tibble(text=s1e5text)
+lines_s1e5<- s1e5texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e5_bing <- lines_s1e5 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 90, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e5_nrc<-
+  lines_s1e5 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 90, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e5_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e5_afinn<-
+  lines_s1e5 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 90, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e5_afinn, aes(index, sentiment)) +
+  geom_col() 
+
+```
+
+```{r}
+
+s1e6text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e6.txt")
+s1e6texttable <- tibble(text=s1e6text)
+lines_s1e6<- s1e6texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e6_bing <- lines_s1e6 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/%75, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e6_nrc<-
+  lines_s1e6 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 75, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e6_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e6_afinn<-
+  lines_s1e6 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 75, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e6_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+
+s1e7text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e7.txt")
+s1e7texttable <- tibble(text=s1e7text)
+lines_s1e7<- s1e7texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e7_bing <- lines_s1e7 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 85, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e7_nrc<-
+  lines_s1e7 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 85, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+
+ggplot(plotsentiment_s1e7_bing, aes(index, sentiment)) +
+  geom_col()
+
+
+plotsentiment_s1e7_afinn<-
+  lines_s1e7 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 85, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e7_afinn, aes(index, sentiment)) +
+  geom_col() 
+
+```
+
+```{r}
+
+
+s1e8text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e8new.txt")
+s1e8texttable <- tibble(text=s1e8text)
+lines_s1e8<- s1e8texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e8_bing <- lines_s1e8 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 85, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e8_nrc<-
+  lines_s1e8 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 85, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e8_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e8_afinn<-
+  lines_s1e8 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 85, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e8_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+
+s1e9text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e9.txt")
+s1e9texttable <- tibble(text=s1e9text)
+lines_s1e9<- s1e9texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e9_bing <- lines_s1e9 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 80, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e9_nrc<-
+  lines_s1e9 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 80, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+ggplot(plotsentiment_s1e9_bing, aes(index, sentiment)) +
+  geom_col()
+
+plotsentiment_s1e9_afinn<-
+  lines_s1e9 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 80, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e9_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+
+s1e10text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/Scripts/s1e10.txt")
+s1e10texttable <- tibble(text=s1e10text)
+lines_s1e10<- s1e10texttable %>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word)
+
+plotsentiment_s1e10_bing <- lines_s1e10 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(index = linenumber %/% 65, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+plotsentiment_s1e10_nrc<-
+  lines_s1e10 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(index = linenumber %/% 65, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+
+ggplot(plotsentiment_s1e10_bing, aes(index, sentiment)) +
+  geom_col()
+
+
+plotsentiment_s1e10_afinn<-
+  lines_s1e10 %>%
+  inner_join(get_sentiments("afinn")) %>%
+  count(index = linenumber %/% 65, score) %>%
+  group_by(index) %>%
+  summarize(sentiment=sum(score))
+
+ggplot(plotsentiment_s1e10_afinn, aes(index, sentiment)) +
+  geom_col() 
+```
+
+```{r}
+season1sentimentarc_bing <- rbind(plotsentiment_s1e1_bing,plotsentiment_s1e2_bing, plotsentiment_s1e3_bing, plotsentiment_s1e4_bing, plotsentiment_s1e5_bing, plotsentiment_s1e6_bing, plotsentiment_s1e7_bing,plotsentiment_s1e8_bing,plotsentiment_s1e9_bing,plotsentiment_s1e10_bing)
+
+season1sentimentarc_bing <- season1sentimentarc_bing %>%
+  mutate(line=rownames(season1sentimentarc_bing))
+
+season1sentimentarc_nrc <- rbind(plotsentiment_s1e1_nrc, plotsentiment_s1e2_nrc, plotsentiment_s1e3_nrc,plotsentiment_s1e4_nrc, plotsentiment_s1e5_nrc, plotsentiment_s1e6_nrc, plotsentiment_s1e7_nrc, plotsentiment_s1e8_nrc, plotsentiment_s1e9_nrc, plotsentiment_s1e10_nrc)
+
+season1sentimentarc_nrc <- season1sentimentarc_nrc %>%
+  mutate(line=rownames(season1sentimentarc_nrc))
+  
+season1sentimentarc_afinn <- rbind(plotsentiment_s1e1_afinn, plotsentiment_s1e2_afinn, plotsentiment_s1e3_afinn,plotsentiment_s1e4_afinn, plotsentiment_s1e5_afinn, plotsentiment_s1e6_afinn, plotsentiment_s1e7_afinn, plotsentiment_s1e8_afinn, plotsentiment_s1e9_afinn, plotsentiment_s1e10_afinn)
+
+season1sentimentarc_afinn <- season1sentimentarc_afinn %>%
+  mutate(line=rownames(season1sentimentarc_afinn))
+
+season1sentimentarc_bing <- season1sentimentarc_bing %>%
+  mutate(Norm_Sentiment_s = sentiment/mean(sentiment))
+plotsentiment_book1_bing <- plotsentiment_book1_bing %>%
+  mutate(Norm_Sentiment_b = sentiment/mean(sentiment))
+
+ggplot(season1sentimentarc_bing, aes(x=line,y=sentiment)) +
+  geom_col()
+
+ggplot(plotsentiment_book1_bing, aes(index, sentiment)) +
+  geom_col() 
+
+    
+ggplot(season1sentimentarc_bing, aes(x=line,y=Norm_Sentiment_s)) +
+  geom_col()
+
+ggplot(plotsentiment_book1_bing, aes(index, Norm_Sentiment_b)) +
+  geom_col() 
+
+season1sentimentarc_bing <- season1sentimentarc_bing %>%
+  mutate(Norm_Sentiment_s = sentiment/mean(sentiment))
+plotsentiment_book1_bing <- plotsentiment_book1_bing %>%
+  mutate(Norm_Sentiment_b = sentiment/mean(sentiment))
+
+season1sentimentarc_bing$line <- as.numeric(season1sentimentarc_bing$line)
+
+season1.vs.book1.bing <- season1sentimentarc_bing %>%
+  left_join(plotsentiment_book1_bing, by=c("line"="index")) %>%
+  mutate(Difference=abs(Norm_Sentiment_s-Norm_Sentiment_b))
+ggplot(season1.vs.book1.bing, aes(x=line,y=Difference))+
+  geom_col()
+
+```
+
+```{r}
+ggplot(season1sentimentarc_nrc, aes(x=line,y=sentiment)) +
+  geom_col()
+
+ggplot(plotsentiment_book1_nrc, aes(index, sentiment)) +
+  geom_col() 
+
+
+```
+
+
+```{r}
+ggplot(season1sentimentarc_afinn, aes(x=line,y=sentiment)) +
+  geom_col()
+
+ggplot(plotsentiment_book1_afinn, aes(index, sentiment)) +
+  geom_col() 
+
+season1sentimentarc_afinn <- season1sentimentarc_afinn %>%
+  mutate(Norm_Sentiment_s = sentiment/mean(sentiment))
+plotsentiment_book1_afinn <- plotsentiment_book1_afinn %>%
+  mutate(Norm_Sentiment_b = sentiment/mean(sentiment))
+
+season1sentimentarc_afinn$line <- as.numeric(season1sentimentarc_afinn$line)
+
+season1.vs.book1.afinn <- season1sentimentarc_afinn %>%
+  left_join(plotsentiment_book1_afinn, by=c("line"="index")) %>%
+  mutate(Difference=abs(Norm_Sentiment_s-Norm_Sentiment_b))
+ggplot(season1.vs.book1.afinn, aes(x=line,y=Difference))+
+  geom_col()
+```
+
+
+```{r}
+percentage.bookpercent1.nrc <- plotsentiment_book1_nrc %>%
+  mutate(Anger_Percentage = sum(anger)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Anticipation_Percentage = sum(anticipation)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Disgust_Percentage = sum(disgust)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Fear_Percentage = sum(fear)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Joy_Percentage = sum(joy)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Positive_Percentage = sum(positive)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Negative_Percentage = sum(negative)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Sadness_Percentage = sum(sadness)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Surprise_Percentage = sum(surprise)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust)))) %>%
+  mutate(Trust_Percentage = sum(trust)/((sum(anger)+sum(anticipation)+sum(disgust)+sum(fear)+sum(joy)+sum(positive)+sum(negative)+sum(sadness)+sum(surprise)+sum(trust))))
+
+```
+
+```{r}
+season1.sentiment.percentage <- read.csv("C:/Users/bobre_000/Documents/Data Science/Project Materials/Season1_Sentiment_Percentage1.csv")
+ggplot(season1.sentiment.percentage)+
+  geom_col(mapping=aes(x=Sentiment,y=Season_Percentage,fill=Sentiment),Legend=FALSE)+
+  ggtitle("Season 1 Sentiment Percentage")
+
+
+ggplot(season1.sentiment.percentage)+
+  geom_col(mapping=aes(x=Sentiment,y=Book_Percentage,fill=Sentiment))+
+  ggtitle("Book 1 Sentiment Percentage")
+
+ggplot(season1.sentiment.percentage)+
+  geom_col(mapping=aes(x=Sentiment,y=Difference,fill=Sentiment))+
+  ggtitle("Difference in Percentage")
+```

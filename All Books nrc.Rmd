@@ -1,0 +1,152 @@
+---
+title: "All Books nrc"
+author: "Brett Olson"
+date: "December 5, 2017"
+output: html_document
+---
+
+```{r}
+library(tufte)
+library(tidyverse)
+library(ggplot2)
+library(ggmap)
+library(tint)
+library(lubridate)
+library(rvest)
+library(stringr)
+library(tidytext)
+library(tibble)
+library(wordcloud)
+library(dplyr)
+library(igraph)
+library(ggraph)
+library(data.table)
+knitr::opts_chunk$set(tidy = FALSE, message=FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+```{r}
+book1text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book1.txt")
+book1texttable <- tibble(text=book1text)
+lines_book1<- book1texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) %>%
+  slice(1:293634)
+
+book1_sevengrams <- book1texttable %>%
+  unnest_tokens(sevengram, text, token = "ngrams", n = 7) %>%
+  slice(230:n()) %>%
+  slice(1:293634)
+book1_sevengrams <- book1_sevengrams %>%
+  separate(sevengram, c("word1", "word2", "word3","word4","word5","word6","word7"), sep = " ")
+
+
+sentiment_book1 <- lines_book1 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  group_by(sentiment) %>%
+  summarize(count=sum(n()))
+ggplot(sentiment_book1, mapping=aes(x=sentiment,y=count))+
+  geom_col()
+
+
+
+book2text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book2.txt")
+book2texttable <- tibble(text=book2text)
+lines_book2<- book2texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) 
+
+book2_sevengrams <- book2texttable %>%
+  unnest_tokens(sevengram, text, token = "ngrams", n = 7) %>%
+  slice(230:n()) 
+book2_sevengrams <- book2_sevengrams %>%
+  separate(sevengram, c("word1", "word2", "word3","word4","word5","word6","word7"), sep = " ")
+
+
+sentiment_book2 <- lines_book2 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  group_by(sentiment) %>%
+  summarize(count=sum(n()))
+ggplot(sentiment_book2, mapping=aes(x=sentiment,y=count))+
+  geom_col()
+
+
+
+book3text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book3.txt")
+book3texttable <- tibble(text=book3text)
+lines_book3<- book3texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) 
+
+book3_sevengrams <- book3texttable %>%
+  unnest_tokens(sevengram, text, token = "ngrams", n = 7) %>%
+  slice(230:n()) 
+book3_sevengrams <- book3_sevengrams %>%
+  separate(sevengram, c("word1", "word2", "word3","word4","word5","word6","word7"), sep = " ")
+
+
+sentiment_book3 <- lines_book3 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  group_by(sentiment) %>%
+  summarize(count=sum(n()))
+ggplot(sentiment_book3, mapping=aes(x=sentiment,y=count))+
+  geom_col()
+
+
+book4text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book4.txt")
+book4texttable <- tibble(text=book4text)
+lines_book4<- book4texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) 
+
+book4_sevengrams <- book4texttable %>%
+  unnest_tokens(sevengram, text, token = "ngrams", n = 7) %>%
+  slice(230:n()) 
+book4_sevengrams <- book4_sevengrams %>%
+  separate(sevengram, c("word1", "word2", "word3","word4","word5","word6","word7"), sep = " ")
+
+
+sentiment_book4 <- lines_book4 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  group_by(sentiment) %>%
+  summarize(count=sum(n()))
+ggplot(sentiment_book4, mapping=aes(x=sentiment,y=count))+
+  geom_col()
+
+
+book5text <- read_file("C:/Users/bobre_000/Documents/Data Science/Project Materials/book5.txt")
+book5texttable <- tibble(text=book5text)
+lines_book5<- book5texttable%>%
+  unnest_tokens(sentence, text, token="sentences") %>%
+  mutate(linenumber = row_number()) %>%
+  unnest_tokens(word, sentence) %>%
+  filter(!word %in% stop_words$word) %>%
+  slice(230:n()) 
+
+book5_sevengrams <- book5texttable %>%
+  unnest_tokens(sevengram, text, token = "ngrams", n = 7) %>%
+  slice(230:n()) 
+book5_sevengrams <- book5_sevengrams %>%
+  separate(sevengram, c("word1", "word2", "word3","word4","word5","word6","word7"), sep = " ")
+
+
+sentiment_book5 <- lines_book5 %>%
+  inner_join(get_sentiments("nrc")) %>%
+  group_by(sentiment) %>%
+  summarize(count=sum(n()))
+ggplot(sentiment_book5, mapping=aes(x=sentiment,y=count))+
+  geom_col()
+```
+
